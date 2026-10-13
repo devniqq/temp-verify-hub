@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TempMail & SMS Hub | Sichere Wegwerf-Dienste</title>
+    <title>TempVerify Hub | Echte Wegwerf-E-Mails & SMS Services</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -18,7 +18,7 @@
             }
         }
     </script>
-    <!-- FontAwesome für Icons -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="h-full text-slate-100 flex flex-col font-sans selection:bg-brand-500 selection:text-white">
@@ -32,17 +32,17 @@
                 </div>
                 <div>
                     <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">TempVerify Hub</span>
-                    <span class="text-xs block text-brand-400 font-medium">Temp Mail & International SMS</span>
+                    <span class="text-xs block text-brand-400 font-medium">Sichere Postfächer & Verification</span>
                 </div>
             </div>
             
             <!-- Navigation Tabs -->
             <div class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/50">
                 <button onclick="switchTab('email')" id="btn-tab-email" class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all bg-brand-600 text-white shadow">
-                    <i class="fa-solid fa-envelope mr-2"></i>E-Mail
+                    <i class="fa-solid fa-envelope mr-2"></i>E-Mail (Echt)
                 </button>
                 <button onclick="switchTab('sms')" id="btn-tab-sms" class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-comment-sms mr-2"></i>SMS Verify
+                    <i class="fa-solid fa-comment-sms mr-2"></i>SMS Hub
                 </button>
             </div>
         </div>
@@ -51,23 +51,23 @@
     <!-- Main Content -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-------------------------------- TAB 1: EMAIL -------------------------------->
+        <!-------------------------------- TAB 1: EMAIL (ECHT) -------------------------------->
         <div id="tab-email" class="space-y-6">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                 <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl pointer-events-none"></div>
                 
-                <h1 class="text-xl font-bold mb-2">Deine temporäre E-Mail-Adresse</h1>
-                <p class="text-slate-400 text-sm mb-6">Perfekt für Registrierungen, um Spam im Postfach zu vermeiden. Eingehende Mails und Codes erscheinen hier automatisch.</p>
+                <h1 class="text-xl font-bold mb-2">Deine echte temporäre E-Mail-Adresse</h1>
+                <p class="text-slate-400 text-sm mb-6">Erstelle eine Wegwerf-Adresse, um Bestätigungscodes und E-Mails ohne Spam im echten Postfach zu empfangen.</p>
                 
                 <div class="flex flex-col sm:flex-row items-center gap-3">
                     <div class="relative w-full">
-                        <input type="text" id="email-address" readonly class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-slate-200 font-mono text-sm focus:outline-none focus:border-brand-500" value="Lade E-Mail...">
+                        <input type="text" id="email-address" readonly class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-slate-200 font-mono text-sm focus:outline-none focus:border-brand-500" value="Erstelle Adresse...">
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
                         <button onclick="copyEmail()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-slate-200 px-5 py-3.5 rounded-xl font-medium text-sm transition border border-slate-700 flex items-center justify-center gap-2">
                             <i class="fa-regular fa-copy"></i> Kopieren
                         </button>
-                        <button onclick="generateNewEmail()" class="flex-1 sm:flex-none bg-brand-600 hover:bg-brand-500 text-white px-5 py-3.5 rounded-xl font-medium text-sm transition shadow-lg shadow-brand-600/25 flex items-center justify-center gap-2">
+                        <button onclick="createAccount()" class="flex-1 sm:flex-none bg-brand-600 hover:bg-brand-500 text-white px-5 py-3.5 rounded-xl font-medium text-sm transition shadow-lg shadow-brand-600/25 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-rotate"></i> Neu
                         </button>
                     </div>
@@ -79,9 +79,9 @@
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
-                        <span id="mail-status">Postfach ist aktiv (Auto-Refresh alle 10s)</span>
+                        <span id="mail-status">Postfach ist aktiv (Live-Sync)</span>
                     </div>
-                    <span id="countdown">Nächster Check in: 10s</span>
+                    <span id="countdown">Automatischer Abruf aktiv</span>
                 </div>
             </div>
 
@@ -96,7 +96,7 @@
                     <div id="email-list" class="flex-grow overflow-y-auto space-y-2 pr-1">
                         <div class="text-center py-20 text-slate-500 text-sm">
                             <i class="fa-regular fa-paper-plane text-3xl mb-2 block opacity-40"></i>
-                            Keine Nachrichten vorhanden
+                            Warte auf eingehende Mails...
                         </div>
                     </div>
                 </div>
@@ -106,26 +106,32 @@
                     <div id="email-viewer-header" class="border-b border-slate-800 pb-4 mb-4 hidden">
                         <div class="text-xs text-brand-400 font-medium mb-1" id="view-from">Absender: ...</div>
                         <h3 class="text-lg font-bold text-white" id="view-subject">Betreff</h3>
-                        <div class="text-xs text-slate-500 mt-1" id="view-date">Datum</div>
                     </div>
                     <div id="email-body-container" class="flex-grow overflow-y-auto text-sm text-slate-300">
                         <div class="h-full flex flex-col items-center justify-center text-slate-500">
                             <i class="fa-regular fa-envelope-open text-4xl mb-3 opacity-30"></i>
-                            Wähle eine E-Mail aus, um den Inhalt zu lesen.
+                            Klicke links auf eine Mail, um den Inhalt zu lesen.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-------------------------------- TAB 2: SMS VERIFY -------------------------------->
+        <!-------------------------------- TAB 2: SMS VERIFY HUB -------------------------------->
         <div id="tab-sms" class="space-y-6 hidden">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                <h1 class="text-xl font-bold mb-2">Internationale SMS Verifizierungsnummern</h1>
-                <p class="text-slate-400 text-sm mb-6">Wähle eine Nummer aus der weltweiten Liste aus, um SMS-Bestätigungscodes für verschiedene Länder zu empfangen.</p>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl font-bold mb-1">Internationale SMS Verifizierungsnummern</h1>
+                        <p class="text-slate-400 text-sm">Wähle ein Land aus, um öffentliche Nummern für SMS-Bestätigungscodes einzusehen.</p>
+                    </div>
+                    <button onclick="simulateNewSms()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition shadow-lg shadow-brand-600/20 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Test-Code generieren
+                    </button>
+                </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="sms-numbers-grid">
-                    <!-- Wird via JS befüllt -->
+                    <!-- Wird dynamisch befüllt -->
                 </div>
             </div>
 
@@ -134,17 +140,14 @@
                 <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-4">
                     <div>
                         <h3 class="font-bold text-base" id="active-sms-title">Postfach: Wähle eine Nummer</h3>
-                        <p class="text-xs text-slate-400">Eingehende SMS und Verifizierungscodes für die gewählte Nummer.</p>
+                        <p class="text-xs text-slate-400">Eingehende Codes für diese Nummer.</p>
                     </div>
-                    <button onclick="simulateNewSms()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 px-3 py-2 rounded-lg border border-slate-700 transition">
-                        <i class="fa-solid fa-plus mr-1"></i> Test-SMS simulieren
-                    </button>
                 </div>
                 
-                <div id="sms-messages-list" class="space-y-3 min-h-[250px]">
+                <div id="sms-messages-list" class="space-y-3 min-h-[220px]">
                     <div class="text-center py-16 text-slate-500 text-sm">
                         <i class="fa-solid fa-mobile-screen text-3xl mb-2 block opacity-40"></i>
-                        Bitte klicke oben auf eine Nummer, um die empfangenen SMS anzuzeigen.
+                        Bitte wähle oben eine Nummer aus.
                     </div>
                 </div>
             </div>
@@ -154,7 +157,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-800/80 mt-auto py-6 text-center text-xs text-slate-500">
-        <p>&copy; 2026 TempVerify Hub. Optimiert für GitHub Pages.</p>
+        <p>&copy; 2026 TempVerify Hub. Bereit für GitHub Pages.</p>
     </footer>
 
     <!-- JavaScript Logik -->
@@ -179,49 +182,57 @@
             }
         }
 
-        // --- EMAIL SYSTEM (1SecMail API) ---
-        let currentEmail = '';
-        let timerSeconds = 10;
-        let countdownInterval;
+        // --- MAIL.TM API (Echte E-Mails) ---
+        let accountToken = '';
+        let accountEmail = '';
+        let checkInterval;
 
-        async function generateNewEmail() {
+        async function createAccount() {
+            document.getElementById('email-address').value = "Erstelle echte E-Mail...";
             try {
-                document.getElementById('email-address').value = "Generiere neue Adresse...";
-                const res = await fetch('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1');
-                if (!res.ok) throw new Error('Netzwerkfehler');
-                const data = await res.json();
-                if(data && data.length > 0) {
-                    currentEmail = data[0];
-                    document.getElementById('email-address').value = currentEmail;
-                    document.getElementById('email-list').innerHTML = '<div class="text-center py-20 text-slate-500 text-sm"><i class="fa-regular fa-paper-plane text-3xl mb-2 block opacity-40"></i>Keine Nachrichten vorhanden</div>';
-                    document.getElementById('email-viewer-header').classList.add('hidden');
-                    document.getElementById('email-body-container').innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-regular fa-envelope-open text-4xl mb-3 opacity-30"></i>Wähle eine E-Mail aus, um den Inhalt zu lesen.</div>';
-                    fetchMessages();
-                }
+                const domainRes = await fetch('https://api.mail.tm/domains');
+                const domainData = await domainRes.json();
+                const domain = domainData['hydra:member'][0].domain;
+
+                const randStr = Math.random().toString(36).substring(2, 10);
+                accountEmail = `${randStr}@${domain}`;
+                const password = "Password123!";
+
+                await fetch('https://api.mail.tm/accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: accountEmail, password: password })
+                });
+
+                const tokenRes = await fetch('https://api.mail.tm/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: accountEmail, password: password })
+                });
+                const tokenData = await tokenRes.json();
+                accountToken = tokenData.token;
+
+                document.getElementById('email-address').value = accountEmail;
+                document.getElementById('email-list').innerHTML = '<div class="text-center py-20 text-slate-500 text-sm"><i class="fa-regular fa-paper-plane text-3xl mb-2 block opacity-40"></i>Warte auf eingehende Mails...</div>';
+                
+                if(checkInterval) clearInterval(checkInterval);
+                fetchMessages();
+                checkInterval = setInterval(fetchMessages, 5000);
+
             } catch(e) {
-                console.error("E-Mail API Fehler:", e);
-                document.getElementById('email-address').value = "Fehler: Evtl. Adblocker aktiv (API blockiert)";
+                console.error(e);
+                document.getElementById('email-address').value = "Fehler beim Erstellen. Bitte erneut versuchen.";
             }
         }
 
-        function copyEmail() {
-            const emailInput = document.getElementById('email-address');
-            navigator.clipboard.writeText(emailInput.value);
-            const btn = event.currentTarget;
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Kopiert!';
-            setTimeout(() => btn.innerHTML = originalHTML, 2000);
-        }
-
         async function fetchMessages() {
-            if(!currentEmail) return;
-            const parts = currentEmail.split('@');
-            if(parts.length !== 2) return;
-            const [login, domain] = parts;
+            if(!accountToken) return;
             try {
-                const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${login}&domain=${domain}`);
-                if (!res.ok) return;
-                const messages = await res.json();
+                const res = await fetch('https://api.mail.tm/messages', {
+                    headers: { 'Authorization': `Bearer ${accountToken}` }
+                });
+                const data = await res.json();
+                const messages = data['hydra:member'];
                 
                 document.getElementById('mail-count').innerText = `${messages.length} Mails`;
                 const listEl = document.getElementById('email-list');
@@ -232,60 +243,48 @@
                         const item = document.createElement('div');
                         item.className = "p-3 rounded-xl bg-slate-950 hover:bg-slate-800/80 cursor-pointer border border-slate-800/60 transition group";
                         item.innerHTML = `
-                            <div class="text-xs text-brand-400 font-medium truncate group-hover:text-brand-300">${escapeHtml(msg.from)}</div>
-                            <div class="text-sm font-semibold text-slate-200 truncate mt-0.5">${escapeHtml(msg.subject)}</div>
-                            <div class="text-[10px] text-slate-500 mt-1">${msg.date}</div>
+                            <div class="text-xs text-brand-400 font-medium truncate">${msg.from.address}</div>
+                            <div class="text-sm font-semibold text-slate-200 truncate mt-0.5">${msg.subject || '(Kein Betreff)'}</div>
+                            <div class="text-[10px] text-slate-500 mt-1">${msg.intro || ''}</div>
                         `;
-                        item.onclick = () => loadMessageContent(login, domain, msg.id);
+                        item.onclick = () => loadMessageContent(msg.id);
                         listEl.appendChild(item);
                     });
                 }
             } catch(e) {
-                console.error("Fehler beim Abrufen der Mails", e);
+                console.error("Fehler beim Abrufen:", e);
             }
         }
 
-        async function loadMessageContent(login, domain, id) {
+        async function loadMessageContent(id) {
             try {
-                const res = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${login}&domain=${domain}&id=${id}`);
+                const res = await fetch(`https://api.mail.tm/messages/${id}`, {
+                    headers: { 'Authorization': `Bearer ${accountToken}` }
+                });
                 const msg = await res.json();
                 
                 document.getElementById('email-viewer-header').classList.remove('hidden');
-                document.getElementById('view-from').innerText = `Von: ${msg.from}`;
-                document.getElementById('view-subject').innerText = msg.subject;
-                document.getElementById('view-date').innerText = msg.date;
+                document.getElementById('view-from').innerText = `Von: ${msg.from.address}`;
+                document.getElementById('view-subject').innerText = msg.subject || '(Kein Betreff)';
                 
                 const bodyContainer = document.getElementById('email-body-container');
-                if(msg.htmlBody) {
-                    bodyContainer.innerHTML = `<div class="bg-white text-slate-900 p-4 rounded-xl overflow-auto h-full">${msg.htmlBody}</div>`;
+                if(msg.html && msg.html.length > 0) {
+                    bodyContainer.innerHTML = `<div class="bg-white text-slate-900 p-4 rounded-xl overflow-auto h-full">${msg.html[0]}</div>`;
                 } else {
-                    bodyContainer.innerHTML = `<pre class="whitespace-pre-wrap font-sans text-slate-300 p-2">${escapeHtml(msg.textBody)}</pre>`;
+                    bodyContainer.innerHTML = `<pre class="whitespace-pre-wrap font-sans text-slate-300 p-2">${msg.text || ''}</pre>`;
                 }
             } catch(e) {
-                console.error("Fehler beim Laden der Mail", e);
+                console.error(e);
             }
         }
 
-        function escapeHtml(text) {
-            if(!text) return '';
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        function copyEmail() {
+            const emailInput = document.getElementById('email-address');
+            navigator.clipboard.writeText(emailInput.value);
+            alert("E-Mail in Zwischenablage kopiert!");
         }
 
-        function startTimer() {
-            clearInterval(countdownInterval);
-            timerSeconds = 10;
-            countdownInterval = setInterval(() => {
-                timerSeconds--;
-                const countdownEl = document.getElementById('countdown');
-                if(countdownEl) countdownEl.innerText = `Nächster Check in: ${timerSeconds}s`;
-                if(timerSeconds <= 0) {
-                    timerSeconds = 10;
-                    fetchMessages();
-                }
-            }, 1000);
-        }
-
-        // --- SMS VERIFY SYSTEM ---
+        // --- SMS SYSTEM ---
         const dummyNumbers = [
             { id: 1, country: "🇩🇪 Deutschland", number: "+49 152 5892104", provider: "Online", codes: [
                 { sender: "WhatsApp", text: "Dein WhatsApp Code: 492-102", time: "Vor 2 Min" },
@@ -306,18 +305,6 @@
             ]},
             { id: 6, country: "🇦🇺 Australien", number: "+61 491 570 156", provider: "Online", codes: [
                 { sender: "OpenAI", text: "Dein OpenAI Verifizierungscode ist 99210", time: "Vor 6 Min" }
-            ]},
-            { id: 7, country: "🇮🇳 Indien", number: "+91 98765 43210", provider: "Online", codes: [
-                { sender: "Amazon", text: "Amazon OTP: 441920", time: "Vor 10 Min" }
-            ]},
-            { id: 8, country: "🇧🇷 Brasilien", number: "+55 11 98877-6655", provider: "Online", codes: [
-                { sender: "Telegram", text: "Codigo do Telegram: 11283", time: "Vor 20 Min" }
-            ]},
-            { id: 9, country: "🇪🇸 Spanien", number: "+34 600 12 34 56", provider: "Online", codes: [
-                { sender: "Twitter", text: "Tu codigo de verificacion es 8810", time: "Vor 14 Min" }
-            ]},
-            { id: 10, country: "🇯🇵 Japan", number: "+81 90 1234 5678", provider: "Online", codes: [
-                { sender: "Line", text: "LINE 認証番号: 5521", time: "Vor 30 Min" }
             ]}
         ];
 
@@ -389,13 +376,13 @@
 
         function copySmsText(text) {
             navigator.clipboard.writeText(text);
-            alert("SMS-Text / Code in die Zwischenablage kopiert!");
+            alert("Code kopiert!");
         }
 
         function simulateNewSms() {
             const currentObj = dummyNumbers.find(n => n.id === activeSmsId);
             if(!currentObj) return;
-            const randomSenders = ["WhatsApp", "Telegram", "Google", "Netflix", "Amazon", "OpenAI", "Microsoft", "Discord", "TikTok"];
+            const randomSenders = ["WhatsApp", "Telegram", "Google", "Netflix", "Amazon", "OpenAI", "Microsoft", "Discord"];
             const randomSender = randomSenders[Math.floor(Math.random() * randomSenders.length)];
             const randomCode = Math.floor(100000 + Math.random() * 900000);
             
@@ -407,14 +394,18 @@
             renderSmsNumbers();
         }
 
+        function escapeHtml(text) {
+            if(!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
         // --- INIT ---
         window.onload = async () => {
             try {
-                await generateNewEmail();
+                await createAccount();
             } catch(err) {
-                console.log("E-Mail Initialisierung übersprungen:", err);
+                console.log("E-Mail Init Info:", err);
             }
-            startTimer();
             renderSmsNumbers();
         };
     </script>
