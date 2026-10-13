@@ -122,4 +122,301 @@
         <div id="tab-sms" class="space-y-6 hidden">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
                 <h1 class="text-xl font-bold mb-2">Internationale SMS Verifizierungsnummern</h1>
-                <p class="text-slate-40
+                <p class="text-slate-400 text-sm mb-6">Wähle eine Nummer aus der weltweiten Liste aus, um SMS-Bestätigungscodes für verschiedene Länder zu empfangen.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="sms-numbers-grid">
+                    <!-- Wird via JS befüllt -->
+                </div>
+            </div>
+
+            <!-- SMS Inbox Container -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="font-bold text-base" id="active-sms-title">Postfach: Wähle eine Nummer</h3>
+                        <p class="text-xs text-slate-400">Eingehende SMS und Verifizierungscodes für die gewählte Nummer.</p>
+                    </div>
+                    <button onclick="simulateNewSms()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 px-3 py-2 rounded-lg border border-slate-700 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Test-SMS simulieren
+                    </button>
+                </div>
+                
+                <div id="sms-messages-list" class="space-y-3 min-h-[250px]">
+                    <div class="text-center py-16 text-slate-500 text-sm">
+                        <i class="fa-solid fa-mobile-screen text-3xl mb-2 block opacity-40"></i>
+                        Bitte klicke oben auf eine Nummer, um die empfangenen SMS anzuzeigen.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 mt-auto py-6 text-center text-xs text-slate-500">
+        <p>&copy; 2026 TempVerify Hub. Optimiert für GitHub Pages.</p>
+    </footer>
+
+    <!-- JavaScript Logik -->
+    <script>
+        // --- TAB SWITCHING ---
+        function switchTab(tab) {
+            const emailTab = document.getElementById('tab-email');
+            const smsTab = document.getElementById('tab-sms');
+            const btnEmail = document.getElementById('btn-tab-email');
+            const btnSms = document.getElementById('btn-tab-sms');
+
+            if(tab === 'email') {
+                emailTab.classList.remove('hidden');
+                smsTab.classList.add('hidden');
+                btnEmail.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all bg-brand-600 text-white shadow";
+                btnSms.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white";
+            } else {
+                emailTab.classList.add('hidden');
+                smsTab.classList.remove('hidden');
+                btnSms.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all bg-brand-600 text-white shadow";
+                btnEmail.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white";
+            }
+        }
+
+        // --- EMAIL SYSTEM (1SecMail API) ---
+        let currentEmail = '';
+        let timerSeconds = 10;
+        let countdownInterval;
+
+        async function generateNewEmail() {
+            try {
+                document.getElementById('email-address').value = "Generiere neue Adresse...";
+                const res = await fetch('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1');
+                if (!res.ok) throw new Error('Netzwerkfehler');
+                const data = await res.json();
+                if(data && data.length > 0) {
+                    currentEmail = data[0];
+                    document.getElementById('email-address').value = currentEmail;
+                    document.getElementById('email-list').innerHTML = '<div class="text-center py-20 text-slate-500 text-sm"><i class="fa-regular fa-paper-plane text-3xl mb-2 block opacity-40"></i>Keine Nachrichten vorhanden</div>';
+                    document.getElementById('email-viewer-header').classList.add('hidden');
+                    document.getElementById('email-body-container').innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-regular fa-envelope-open text-4xl mb-3 opacity-30"></i>Wähle eine E-Mail aus, um den Inhalt zu lesen.</div>';
+                    fetchMessages();
+                }
+            } catch(e) {
+                console.error("E-Mail API Fehler:", e);
+                document.getElementById('email-address').value = "Fehler: Evtl. Adblocker aktiv (API blockiert)";
+            }
+        }
+
+        function copyEmail() {
+            const emailInput = document.getElementById('email-address');
+            navigator.clipboard.writeText(emailInput.value);
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Kopiert!';
+            setTimeout(() => btn.innerHTML = originalHTML, 2000);
+        }
+
+        async function fetchMessages() {
+            if(!currentEmail) return;
+            const parts = currentEmail.split('@');
+            if(parts.length !== 2) return;
+            const [login, domain] = parts;
+            try {
+                const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${login}&domain=${domain}`);
+                if (!res.ok) return;
+                const messages = await res.json();
+                
+                document.getElementById('mail-count').innerText = `${messages.length} Mails`;
+                const listEl = document.getElementById('email-list');
+                
+                if(messages.length > 0) {
+                    listEl.innerHTML = '';
+                    messages.forEach(msg => {
+                        const item = document.createElement('div');
+                        item.className = "p-3 rounded-xl bg-slate-950 hover:bg-slate-800/80 cursor-pointer border border-slate-800/60 transition group";
+                        item.innerHTML = `
+                            <div class="text-xs text-brand-400 font-medium truncate group-hover:text-brand-300">${escapeHtml(msg.from)}</div>
+                            <div class="text-sm font-semibold text-slate-200 truncate mt-0.5">${escapeHtml(msg.subject)}</div>
+                            <div class="text-[10px] text-slate-500 mt-1">${msg.date}</div>
+                        `;
+                        item.onclick = () => loadMessageContent(login, domain, msg.id);
+                        listEl.appendChild(item);
+                    });
+                }
+            } catch(e) {
+                console.error("Fehler beim Abrufen der Mails", e);
+            }
+        }
+
+        async function loadMessageContent(login, domain, id) {
+            try {
+                const res = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${login}&domain=${domain}&id=${id}`);
+                const msg = await res.json();
+                
+                document.getElementById('email-viewer-header').classList.remove('hidden');
+                document.getElementById('view-from').innerText = `Von: ${msg.from}`;
+                document.getElementById('view-subject').innerText = msg.subject;
+                document.getElementById('view-date').innerText = msg.date;
+                
+                const bodyContainer = document.getElementById('email-body-container');
+                if(msg.htmlBody) {
+                    bodyContainer.innerHTML = `<div class="bg-white text-slate-900 p-4 rounded-xl overflow-auto h-full">${msg.htmlBody}</div>`;
+                } else {
+                    bodyContainer.innerHTML = `<pre class="whitespace-pre-wrap font-sans text-slate-300 p-2">${escapeHtml(msg.textBody)}</pre>`;
+                }
+            } catch(e) {
+                console.error("Fehler beim Laden der Mail", e);
+            }
+        }
+
+        function escapeHtml(text) {
+            if(!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function startTimer() {
+            clearInterval(countdownInterval);
+            timerSeconds = 10;
+            countdownInterval = setInterval(() => {
+                timerSeconds--;
+                const countdownEl = document.getElementById('countdown');
+                if(countdownEl) countdownEl.innerText = `Nächster Check in: ${timerSeconds}s`;
+                if(timerSeconds <= 0) {
+                    timerSeconds = 10;
+                    fetchMessages();
+                }
+            }, 1000);
+        }
+
+        // --- SMS VERIFY SYSTEM ---
+        const dummyNumbers = [
+            { id: 1, country: "🇩🇪 Deutschland", number: "+49 152 5892104", provider: "Online", codes: [
+                { sender: "WhatsApp", text: "Dein WhatsApp Code: 492-102", time: "Vor 2 Min" },
+                { sender: "Google", text: "G-839210 ist dein Google Bestätigungscode.", time: "Vor 15 Min" }
+            ]},
+            { id: 2, country: "🇺🇸 USA", number: "+1 (555) 382-9102", provider: "Online", codes: [
+                { sender: "Telegram", text: "Dein Telegram Login-Code lautet: 99231", time: "Vor 1 Min" },
+                { sender: "Discord", text: "Dein Discord Verifizierungscode ist: 771029", time: "Vor 8 Min" }
+            ]},
+            { id: 3, country: "🇬🇧 UK", number: "+44 7911 732910", provider: "Online", codes: [
+                { sender: "Instagram", text: "192-834 ist dein Instagram Code.", time: "Vor 5 Min" }
+            ]},
+            { id: 4, country: "🇫🇷 Frankreich", number: "+33 6 55 44 33 22", provider: "Online", codes: [
+                { sender: "TikTok", text: "Dein Bestätigungscode lautet 8391", time: "Vor 12 Min" }
+            ]},
+            { id: 5, country: "🇨🇦 Kanada", number: "+1 (604) 555-0143", provider: "Online", codes: [
+                { sender: "Netflix", text: "Dein Netflix Code: 5541", time: "Vor 3 Min" }
+            ]},
+            { id: 6, country: "🇦🇺 Australien", number: "+61 491 570 156", provider: "Online", codes: [
+                { sender: "OpenAI", text: "Dein OpenAI Verifizierungscode ist 99210", time: "Vor 6 Min" }
+            ]},
+            { id: 7, country: "🇮🇳 Indien", number: "+91 98765 43210", provider: "Online", codes: [
+                { sender: "Amazon", text: "Amazon OTP: 441920", time: "Vor 10 Min" }
+            ]},
+            { id: 8, country: "🇧🇷 Brasilien", number: "+55 11 98877-6655", provider: "Online", codes: [
+                { sender: "Telegram", text: "Codigo do Telegram: 11283", time: "Vor 20 Min" }
+            ]},
+            { id: 9, country: "🇪🇸 Spanien", number: "+34 600 12 34 56", provider: "Online", codes: [
+                { sender: "Twitter", text: "Tu codigo de verificacion es 8810", time: "Vor 14 Min" }
+            ]},
+            { id: 10, country: "🇯🇵 Japan", number: "+81 90 1234 5678", provider: "Online", codes: [
+                { sender: "Line", text: "LINE 認証番号: 5521", time: "Vor 30 Min" }
+            ]}
+        ];
+
+        let activeSmsId = 1;
+
+        function renderSmsNumbers() {
+            const grid = document.getElementById('sms-numbers-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            dummyNumbers.forEach(item => {
+                const card = document.createElement('div');
+                const isSelected = item.id === activeSmsId;
+                card.className = `p-4 rounded-xl border cursor-pointer transition flex flex-col justify-between ${isSelected ? 'bg-brand-600/10 border-brand-500 shadow-md shadow-brand-500/10' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="text-xs text-slate-400 font-medium mb-1 truncate">${item.country}</div>
+                        <div class="text-xs font-mono font-bold text-white mb-2 truncate">${item.number}</div>
+                    </div>
+                    <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 text-[11px]">
+                        <span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${item.provider}</span>
+                        <span class="text-brand-400 font-medium">${item.codes.length} SMS</span>
+                    </div>
+                `;
+                card.onclick = () => selectSmsNumber(item.id);
+                grid.appendChild(card);
+            });
+            renderSmsInbox();
+        }
+
+        function selectSmsNumber(id) {
+            activeSmsId = id;
+            renderSmsNumbers();
+        }
+
+        function renderSmsInbox() {
+            const currentObj = dummyNumbers.find(n => n.id === activeSmsId);
+            const titleEl = document.getElementById('active-sms-title');
+            if(titleEl && currentObj) {
+                titleEl.innerText = `Postfach für: ${currentObj.number} (${currentObj.country})`;
+            }
+            
+            const list = document.getElementById('sms-messages-list');
+            if(!list) return;
+
+            if(!currentObj || currentObj.codes.length === 0) {
+                list.innerHTML = '<div class="text-center py-16 text-slate-500 text-sm">Noch keine SMS für diese Nummer empfangen.</div>';
+                return;
+            }
+
+            list.innerHTML = '';
+            currentObj.codes.forEach(sms => {
+                const smsEl = document.createElement('div');
+                smsEl.className = "bg-slate-950 border border-slate-800/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+                smsEl.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-brand-500/10 text-brand-400 text-xs px-2 py-0.5 rounded font-semibold">${escapeHtml(sms.sender)}</span>
+                            <span class="text-xs text-slate-500">${sms.time}</span>
+                        </div>
+                        <p class="text-sm font-mono text-slate-200 mt-1">${escapeHtml(sms.text)}</p>
+                    </div>
+                    <button onclick="copySmsText('${escapeHtml(sms.text)}')" class="self-start sm:self-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-regular fa-copy"></i> Code kopieren
+                    </button>
+                `;
+                list.appendChild(smsEl);
+            });
+        }
+
+        function copySmsText(text) {
+            navigator.clipboard.writeText(text);
+            alert("SMS-Text / Code in die Zwischenablage kopiert!");
+        }
+
+        function simulateNewSms() {
+            const currentObj = dummyNumbers.find(n => n.id === activeSmsId);
+            if(!currentObj) return;
+            const randomSenders = ["WhatsApp", "Telegram", "Google", "Netflix", "Amazon", "OpenAI", "Microsoft", "Discord", "TikTok"];
+            const randomSender = randomSenders[Math.floor(Math.random() * randomSenders.length)];
+            const randomCode = Math.floor(100000 + Math.random() * 900000);
+            
+            currentObj.codes.unshift({
+                sender: randomSender,
+                text: `Dein ${randomSender} Bestätigungscode lautet: ${randomCode}`,
+                time: "Gerade eben"
+            });
+            renderSmsNumbers();
+        }
+
+        // --- INIT ---
+        window.onload = async () => {
+            try {
+                await generateNewEmail();
+            } catch(err) {
+                console.log("E-Mail Initialisierung übersprungen:", err);
+            }
+            startTimer();
+            renderSmsNumbers();
+        };
+    </script>
+</body>
+</html>
